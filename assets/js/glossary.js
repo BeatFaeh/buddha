@@ -1,0 +1,1 @@
+const search=document.getElementById('glossary-search');if(search){search.addEventListener('input',()=>{const q=search.value.trim().toLocaleLowerCase('de');document.querySelectorAll('#glossary-list .entry').forEach((entry)=>{entry.hidden=q!==''&&!entry.dataset.search.includes(q);});});}
