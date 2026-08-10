@@ -25,13 +25,14 @@ $glossaryRows = $glossaryRepository->all();
         <nav class="nav-actions">
             <a class="button neutral" href="#neue-lernkarte">Neue Lernkarte</a>
             <a class="button neutral" href="#neuer-begriff">Neuer Glossarbegriff</a>
+            <a class="button neutral" href="#dokument-upload">Datei hochladen</a>
             <a class="button neutral" href="#passwort">Passwort ändern</a>
             <a class="button secondary" href="index.php">Öffentliche Ansicht</a>
             <a class="button danger" href="index.php?action=logout">Abmelden</a>
         </nav>
     </header>
 
-    <?php if ($flashMessage): ?>
+    <?php if ($flashMessage && (string)($_GET['notice'] ?? '') !== 'upload'): ?>
         <div class="message <?= Html::e((string) $flashMessage['type']) ?>">
             <?= Html::e((string) $flashMessage['message']) ?>
         </div>
@@ -64,6 +65,49 @@ $glossaryRows = $glossaryRepository->all();
                 <button type="submit">Glossarbegriff speichern</button>
             </form>
         </article>
+    </section>
+
+    <section class="panel list-panel upload-panel" id="dokument-upload">
+        <h2>Dokument hochladen</h2>
+        <?php if ($flashMessage && (string)($_GET['notice'] ?? '') === 'upload'): ?>
+            <div class="message <?= Html::e((string) $flashMessage['type']) ?>" role="status" aria-live="polite">
+                <?= Html::e((string) $flashMessage['message']) ?>
+            </div>
+        <?php endif; ?>
+        <p class="muted">Neue Dateien direkt in Literatur, Lernmodule oder Meditation ablegen. Sie erscheinen danach automatisch in der jeweiligen Übersicht.</p>
+        <?php
+        $uploadDiagnostics = [
+            'PHP-Dateiupload' => filter_var(ini_get('file_uploads'), FILTER_VALIDATE_BOOLEAN) ? 'aktiv' : 'deaktiviert',
+            'upload_max_filesize' => (string) ini_get('upload_max_filesize'),
+            'post_max_size' => (string) ini_get('post_max_size'),
+            'Literatur beschreibbar' => is_writable(__DIR__ . '/../literatur') ? 'ja' : 'NEIN',
+            'Lernmodule beschreibbar' => is_writable(__DIR__ . '/../lernmodule') ? 'ja' : 'NEIN',
+            'Meditation beschreibbar' => is_writable(__DIR__ . '/../meditation') ? 'ja' : 'NEIN',
+        ];
+        ?>
+        <details class="upload-diagnostics">
+            <summary>Upload-Diagnose anzeigen</summary>
+            <ul>
+                <?php foreach ($uploadDiagnostics as $label => $value): ?>
+                    <li><strong><?= Html::e($label) ?>:</strong> <?= Html::e($value) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </details>
+        <form method="post" action="index.php" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="<?= Html::e($csrf->token()) ?>">
+            <input type="hidden" name="form_action" value="upload_document">
+            <input type="hidden" name="MAX_FILE_SIZE" value="26214400">
+            <label>Bereich</label>
+            <select name="document_area" required>
+                <option value="literatur">Literatur</option>
+                <option value="lernmodule">Lernmodule</option>
+                <option value="meditation">Meditation</option>
+            </select>
+            <label>Datei auswählen</label>
+            <input type="file" name="document_file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.jpg,.jpeg,.png,.webp,.mp3,.wav,.m4a,.mp4,.mov,.webm,.zip" required>
+            <p class="muted">Erlaubt: PDF, Office, Text, Bilder, Audio, Video und ZIP · maximal 25 MB.</p>
+            <button type="submit">Datei hochladen</button>
+        </form>
     </section>
 
     <section class="panel list-panel" id="passwort">

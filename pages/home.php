@@ -14,12 +14,12 @@ $glossary=$glossaryRepository->asMap();
 <?php else: ?><details class="accordion"><summary>Antwort anzeigen</summary><div class="accordion-content"><?= $glossaryFormatter->format($card['antwort'],$glossary) ?></div></details><?php endif; ?>
 <div class="actions">
 <a class="button button-primary" href="index.php?modus=<?= Html::e($mode) ?>"><?= $mode==='mc'?'Neue Multiple-Choice-Frage':'Neue Zufallsfrage' ?></a>
-<a class="button button-secondary" href="index.php?action=pdf">Alle Lernkarten / PDF</a>
-<a class="button button-secondary" href="index.php?action=glossar">Glossar</a>
-<a class="button button-primary" href="index.php?action=pruefung">📝 Prüfung · 100 Fragen</a>
-<a class="button button-secondary" href="literatur/">📚 Literatur</a>
-<a class="button button-secondary" href="lernmodule/">🎓 Lernmodule</a>
-<a class="button button-secondary" href="meditation/">🧘 Meditation</a>
-<a class="button button-admin" href="index.php?action=admin">Administration</a>
+<a class="button button-secondary" href="index.php?action=pdf " target="_blank">Alle Lernkarten / PDF</a>
+<a class="button button-secondary" href="index.php?action=glossar" target="_blank">Glossar</a>
+<a class="button button-primary" href="index.php?action=pruefung" target="_blank">📝 Prüfung · 100 Fragen</a>
+<a class="button button-secondary" href="literatur/" target="_blank">📚 Literatur</a>
+<a class="button button-secondary" href="lernmodule/" target="_blank">🎓 Lernmodule</a>
+<a class="button button-secondary" href="meditation/" target="_blank">🧘 Meditation</a>
+<a class="button button-admin" href="index.php?action=admin" target="_blank">Administration</a>
 </div></div></section><?php endif; ?>
 <?php require __DIR__.'/../partials/site-footer.php'; ?></div></main><script src="assets/js/quiz.js"></script></body></html>

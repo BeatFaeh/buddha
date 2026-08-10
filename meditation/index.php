@@ -37,6 +37,7 @@ $excludedFiles = [
     '.htaccess',
     'Thumbs.db',
     '.DS_Store',
+    'README.md',
 ];
 
 /*
