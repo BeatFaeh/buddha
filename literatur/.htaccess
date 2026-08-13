@@ -1,0 +1,14 @@
+Options -Indexes
+
+# index.php sowie die fuer die Verzeichnisansicht benoetigten CSS-/JS-Dateien
+# duerfen direkt geladen werden. Alle Dokumente/Medien werden ausschliesslich
+# ueber /protected-file.php ausgeliefert, der die Admin-Session prueft.
+<FilesMatch "^(?!index\.php$|style\.css$|directory\.js$).+">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
