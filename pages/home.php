@@ -2,14 +2,88 @@
 
 declare(strict_types=1);
 
+
+/* =========================================================
+   LERNMODUS
+   ========================================================= */
+
 $mode = (string) ($_GET['modus'] ?? 'text');
 
 if (!in_array($mode, ['text', 'mc'], true)) {
     $mode = 'text';
 }
 
-$card = $cardRepository->random();
+
+/* =========================================================
+   GEZIELTE KARTENAUSWAHL
+   ========================================================= */
+
+$search = trim(
+    (string) ($_GET['suche'] ?? '')
+);
+
+$searchMessage = '';
+
+
+/*
+ * Wenn ein Suchwert eingegeben wurde,
+ * wird gezielt gesucht.
+ *
+ * Ohne Suchwert bleibt das bisherige Verhalten:
+ * eine zufällige Lernkarte wird geladen.
+ */
+if ($search !== '') {
+
+    /*
+     * Reine Zahl:
+     * exakte Suche nach Lernkarten-ID.
+     */
+    if (ctype_digit($search)) {
+
+        $card = $cardRepository->findById(
+            (int) $search
+        );
+
+        if (!$card) {
+            $searchMessage =
+                'Keine Lernkarte mit der ID '
+                . $search
+                . ' gefunden.';
+        }
+
+    } else {
+
+        /*
+         * Text:
+         * Suche nach Begriff in Frage und Antwort.
+         */
+        $card = $cardRepository->findByTerm(
+            $search
+        );
+
+        if (!$card) {
+            $searchMessage =
+                'Keine Lernkarte zum Begriff „'
+                . $search
+                . '“ gefunden.';
+        }
+    }
+
+} else {
+
+    /*
+     * Bestehende Zufallsfunktion.
+     */
+    $card = $cardRepository->random();
+}
+
+
 $count = $cardRepository->count();
+
+
+/* =========================================================
+   MULTIPLE CHOICE
+   ========================================================= */
 
 $quiz = [
     'options'     => [],
@@ -19,6 +93,11 @@ $quiz = [
 if ($mode === 'mc' && $card) {
     $quiz = $quizService->build($card);
 }
+
+
+/* =========================================================
+   GLOSSAR
+   ========================================================= */
 
 $glossary = $glossaryRepository->asMap();
 
@@ -80,10 +159,73 @@ $glossary = $glossaryRepository->asMap();
         </nav>
 
 
+        <!-- =====================================================
+             LERNKARTE GEZIELT AUSWÄHLEN
+             ===================================================== -->
+
+        <form
+                class="card-search"
+                method="get"
+                action="index.php"
+        >
+
+            <input
+                    type="hidden"
+                    name="modus"
+                    value="<?= Html::e($mode) ?>"
+            >
+
+            <label
+                    class="card-search-label"
+                    for="card-search-input"
+            >
+                Lernkarte gezielt auswählen
+            </label>
+
+            <div class="card-search-row">
+
+                <input
+                        id="card-search-input"
+                        class="card-search-input"
+                        type="search"
+                        name="suche"
+                        value="<?= Html::e($search) ?>"
+                        placeholder="ID oder Begriff, z. B. 53 oder Skandhas"
+                        autocomplete="off"
+                >
+
+                <button
+                        class="button button-primary card-search-button"
+                        type="submit"
+                >
+                    🔎 Suchen
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- =====================================================
+             SUCHMELDUNG
+             ===================================================== -->
+
+        <?php if ($searchMessage !== ''): ?>
+
+            <div
+                    class="search-message"
+                    role="status"
+            >
+                <?= Html::e($searchMessage) ?>
+            </div>
+
+        <?php endif; ?>
+
+
         <?php if (!$card): ?>
 
             <!-- =================================================
-                 KEINE LERNKARTEN
+                 KEINE PASSENDE LERNKARTE
                  ================================================= -->
 
             <section class="learning-card">
@@ -91,8 +233,34 @@ $glossary = $glossaryRepository->asMap();
                 <div class="card-content">
 
                     <h2>
-                        Keine Lernkarten vorhanden
+                        <?= $search !== ''
+                            ? 'Keine passende Lernkarte gefunden'
+                            : 'Keine Lernkarten vorhanden'
+                        ?>
                     </h2>
+
+
+                    <!-- =========================================
+                         ZUFALLSFUNKTION BLEIBT AUCH HIER ERHALTEN
+                         ========================================= -->
+
+                    <?php if ($search !== ''): ?>
+
+                        <div class="actions actions-single">
+
+                            <a
+                                    class="button button-primary"
+                                    href="index.php?modus=<?= Html::e($mode) ?>"
+                            >
+                                <?= $mode === 'mc'
+                                    ? 'Neue Multiple-Choice-Frage'
+                                    : 'Neue Zufallsfrage'
+                                ?>
+                            </a>
+
+                        </div>
+
+                    <?php endif; ?>
 
                 </div>
 
@@ -117,19 +285,25 @@ $glossary = $glossaryRepository->asMap();
                     <div class="meta">
 
                         <span class="badge">
+
                             <?= $mode === 'mc'
                                 ? 'Multiple Choice'
                                 : 'Karte'
                             ?>
+
                             #<?= (int) $card['id'] ?>
+
                         </span>
 
                         <span class="counter">
+
                             <?= $count ?>
+
                             <?= $count === 1
                                 ? 'Lernkarte'
                                 : 'Lernkarten'
                             ?>
+
                         </span>
 
                     </div>
@@ -140,10 +314,12 @@ $glossary = $glossaryRepository->asMap();
                          ========================================= -->
 
                     <p class="question-label">
+
                         <?= $mode === 'mc'
                             ? 'Multiple-Choice-Frage'
                             : 'Frage'
                         ?>
+
                     </p>
 
                     <h2 class="question">
@@ -170,7 +346,8 @@ $glossary = $glossaryRepository->asMap();
                             >
 
                                 <?php foreach (
-                                    $quiz['options'] as $letter => $answer
+                                    $quiz['options']
+                                    as $letter => $answer
                                 ): ?>
 
                                     <button
@@ -201,10 +378,16 @@ $glossary = $glossaryRepository->asMap();
                         <?php else: ?>
 
                             <div class="mc-error">
+
                                 Für Multiple Choice werden mindestens
                                 vier unterschiedliche Antworten in
-                                <code>tbl_buddhismus.antwort</code>
+
+                                <code>
+                                    tbl_buddhismus.antwort
+                                </code>
+
                                 benötigt.
+
                             </div>
 
                         <?php endif; ?>
@@ -223,10 +406,12 @@ $glossary = $glossaryRepository->asMap();
                             </summary>
 
                             <div class="accordion-content">
+
                                 <?= $glossaryFormatter->format(
                                     $card['antwort'],
                                     $glossary
                                 ) ?>
+
                             </div>
 
                         </details>
@@ -240,23 +425,32 @@ $glossary = $glossaryRepository->asMap();
 
                     <div class="actions">
 
+
+                        <!-- =====================================
+                             ZUFALLSFRAGE BLEIBT UNVERÄNDERT
+                             ===================================== -->
+
                         <a
                                 class="button button-primary"
                                 href="index.php?modus=<?= Html::e($mode) ?>"
                         >
+
                             <?= $mode === 'mc'
                                 ? 'Neue Multiple-Choice-Frage'
                                 : 'Neue Zufallsfrage'
                             ?>
+
                         </a>
+
 
                         <a
                                 class="button button-secondary"
-                                href="index.php?action=pdf "
+                                href="index.php?action=pdf"
                                 target="_blank"
                         >
                             Alle Lernkarten / PDF
                         </a>
+
 
                         <a
                                 class="button button-secondary"
@@ -266,6 +460,7 @@ $glossary = $glossaryRepository->asMap();
                             Glossar
                         </a>
 
+
                         <a
                                 class="button button-primary"
                                 href="index.php?action=pruefung"
@@ -273,6 +468,7 @@ $glossary = $glossaryRepository->asMap();
                         >
                             📝 Prüfung · 100 Fragen
                         </a>
+
 
                         <a
                                 class="button button-secondary"
@@ -282,6 +478,7 @@ $glossary = $glossaryRepository->asMap();
                             📚 Literatur
                         </a>
 
+
                         <a
                                 class="button button-secondary"
                                 href="lernmodule/"
@@ -290,6 +487,7 @@ $glossary = $glossaryRepository->asMap();
                             🎓 Lernmodule
                         </a>
 
+
                         <a
                                 class="button button-secondary"
                                 href="meditation/"
@@ -297,6 +495,7 @@ $glossary = $glossaryRepository->asMap();
                         >
                             🧘 Meditation
                         </a>
+
 
                         <a
                                 class="button button-admin"
@@ -320,6 +519,7 @@ $glossary = $glossaryRepository->asMap();
     </div>
 
 </main>
+
 
 <script src="assets/js/tooltips.js"></script>
 <script src="assets/js/quiz.js"></script>
