@@ -159,7 +159,7 @@ $glossaryRows = $glossaryRepository->all();
 
         <?php foreach ($glossaryRows as $row): ?>
             <details class="entry">
-                <summary><?= Html::e($row['begriff']) ?></summary>
+                <summary>#<?= (int) $row['id'] ?> · <?= Html::e($row['begriff']) ?></summary>
                 <form method="post" action="index.php">
                     <input type="hidden" name="csrf_token" value="<?= Html::e($csrf->token()) ?>">
                     <input type="hidden" name="form_action" value="update_glossary">
