@@ -441,13 +441,7 @@ $fileCount = count($files);
                 www.faeh.sh
             </a>
 <br><br>			
-            <a
-                href="https://www.faeh.sh/buddha"
-                target="_blank"
-                rel="noopener"
-            >
-                zurück
-            </a>
+
         </footer>
 
     </div>
