@@ -1,3 +1,123 @@
 <?php
-declare(strict_types=1); $rows=$glossaryRepository->all();
-?><!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Glossar – Buddhistische Lernkarten</title><link rel="stylesheet" href="assets/css/glossary.css"></head><body><main class="wrapper"><header class="hero"><div class="dharma-wheel" aria-hidden="true">☸</div><h1>Buddhistisches Glossar</h1><p class="intro">Begriffe und Erklärungen aus deinen buddhistischen Studien.</p></header><div class="toolbar"><input id="glossary-search" class="search" type="search" placeholder="Glossar durchsuchen …" autocomplete="off"><a class="button" href="index.php">Zurück zu den Lernkarten</a></div><section class="glossary"><p class="count"><?= count($rows) ?> <?= count($rows)===1?'Begriff':'Begriffe' ?></p><div id="glossary-list"><?php foreach($rows as $row): ?><article class="entry" data-search="<?= Html::e(mb_strtolower((string)$row['begriff'].' '.(string)$row['erklaerung'],'UTF-8')) ?>"><h2 class="term"><?= Html::e($row['begriff']) ?></h2><p class="explanation"><?= nl2br(Html::e($row['erklaerung'])) ?></p></article><?php endforeach; ?></div></section><footer>Mögen Weisheit und Mitgefühl wachsen.</footer></main><script src="assets/js/glossary.js"></script></body></html>
+
+declare(strict_types=1);
+
+$rows = $glossaryRepository->all();
+
+?>
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Glossar – Buddhistische Lernkarten</title>
+
+    <link rel="stylesheet" href="assets/css/glossary.css">
+</head>
+
+<body>
+
+<main class="wrapper">
+
+    <header class="hero">
+
+        <div class="dharma-wheel" aria-hidden="true">
+            ☸
+        </div>
+
+        <h1>Buddhistisches Glossar</h1>
+
+        <p class="intro">
+            Begriffe und Erklärungen aus deinen buddhistischen Studien.
+        </p>
+
+    </header>
+
+
+    <div class="toolbar">
+
+        <input
+                id="glossary-search"
+                class="search"
+                type="search"
+                placeholder="Glossar durchsuchen …"
+                autocomplete="off"
+        >
+
+        <select
+                id="glossary-sort"
+                class="sort"
+                aria-label="Glossar sortieren"
+        >
+            <option value="asc">Begriff A–Z</option>
+            <option value="desc">Begriff Z–A</option>
+        </select>
+
+        <a class="button" href="index.php">
+            Zurück zu den Lernkarten
+        </a>
+
+    </div>
+
+
+    <section class="glossary">
+
+        <p class="count">
+            <?= count($rows) ?>
+            <?= count($rows) === 1 ? 'Begriff' : 'Begriffe' ?>
+        </p>
+
+
+        <div id="glossary-list">
+
+            <?php foreach ($rows as $row): ?>
+
+                <article
+                        class="entry"
+                        data-term="<?= Html::e(
+                            mb_strtolower(
+                                (string) $row['begriff'],
+                                'UTF-8'
+                            )
+                        ) ?>"
+                        data-search="<?= Html::e(
+                            mb_strtolower(
+                                (string) $row['begriff']
+                                . ' '
+                                . (string) $row['erklaerung'],
+                                'UTF-8'
+                            )
+                        ) ?>"
+                >
+
+                    <h2 class="term">
+                        ID <?= (int) $row['id'] ?>
+                        –
+                        <?= Html::e($row['begriff']) ?>
+                    </h2>
+
+                    <p class="explanation">
+                        <?= nl2br(Html::e($row['erklaerung'])) ?>
+                    </p>
+
+                </article>
+
+            <?php endforeach; ?>
+
+        </div>
+
+    </section>
+
+
+    <footer>
+        Mögen Weisheit und Mitgefühl wachsen.
+    </footer>
+
+</main>
+
+<script src="assets/js/glossary.js"></script>
+
+</body>
+</html>

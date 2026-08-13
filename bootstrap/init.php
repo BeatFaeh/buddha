@@ -38,4 +38,4 @@ $examService = new ExamService($cardRepository, $quizService);
 $glossaryFormatter = new GlossaryFormatter();
 
 require __DIR__ . '/../database/schema.php';
-require __DIR__ . '/../database/seed.php';
+/* require __DIR__ . '/../database/seed.php'; */

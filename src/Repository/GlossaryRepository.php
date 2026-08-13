@@ -9,7 +9,7 @@ final class GlossaryRepository
     {
         $map = [];
         $result = $this->db->query(
-            'SELECT begriff, erklaerung FROM tbl_buddhismus_glossar ORDER BY CHAR_LENGTH(begriff) DESC, begriff ASC'
+            'SELECT * FROM tbl_buddhismus_glossar ORDER BY CHAR_LENGTH(begriff) DESC, begriff ASC'
         );
         while ($result && $row = $result->fetch_assoc()) {
             $map[(string)$row['begriff']] = (string)$row['erklaerung'];
