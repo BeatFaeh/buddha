@@ -11,6 +11,11 @@
     --paper: rgba(255, 253, 248, .96);
 }
 
+
+/* =========================================================
+   GRUNDEINSTELLUNGEN
+   ========================================================= */
+
 * {
     box-sizing: border-box;
 }
@@ -262,7 +267,14 @@ h1 {
    ========================================================= */
 
 .learning-card {
-    overflow: hidden;
+    /*
+     * WICHTIG:
+     * NICHT overflow:hidden verwenden!
+     *
+     * Sonst werden Glossar-Tooltips am linken und
+     * rechten Rand der Lernkarte abgeschnitten.
+     */
+    overflow: visible;
 
     border-top:
             6px solid var(--saffron);
@@ -343,6 +355,11 @@ h1 {
    ========================================================= */
 
 details.accordion {
+    /*
+     * Auch hier darf der Tooltip nicht abgeschnitten werden.
+     */
+    overflow: visible;
+
     border: 1px solid var(--line);
     border-radius: 16px;
 
@@ -363,6 +380,13 @@ details.accordion summary {
 }
 
 .accordion-content {
+    /*
+     * Tooltips dürfen auch den Antwortbereich verlassen.
+     */
+    overflow: visible;
+
+    position: relative;
+
     padding: 22px;
 
     font-size: 18px;
@@ -389,21 +413,29 @@ details.accordion summary {
 }
 
 
-/* Standard: Tooltip zentriert */
-
+/*
+ * Standardposition:
+ * Tooltip wird über dem Begriff zentriert.
+ */
 .term-tooltip::after {
     content: attr(data-tooltip);
 
     position: absolute;
 
-    z-index: 100;
+    z-index: 1000;
 
     left: 50%;
 
     bottom:
             calc(100% + 11px);
 
-    width:
+    /*
+     * Kurze Texte bleiben kompakt.
+     * Lange Texte werden maximal 340 Pixel breit.
+     */
+    width: max-content;
+
+    max-width:
             min(
                     340px,
                     calc(100vw - 40px)
@@ -422,7 +454,15 @@ details.accordion summary {
 
     line-height: 1.5;
 
+    /*
+     * Zeilenumbrüche aus dem Glossar bleiben erhalten.
+     */
     white-space: pre-line;
+
+    /*
+     * Sehr lange Wörter dürfen umgebrochen werden.
+     */
+    overflow-wrap: anywhere;
 
     opacity: 0;
 
@@ -434,11 +474,20 @@ details.accordion summary {
     box-shadow:
             0 8px 24px
             rgba(0, 0, 0, .20);
+
+    pointer-events: none;
 }
 
 
-/* Begriff nahe am linken Bildschirmrand */
+/* =========================================================
+   TOOLTIP AM LINKEN RAND
+   ========================================================= */
 
+/*
+ * Wenn JavaScript erkennt, dass ein zentrierter Tooltip
+ * links aus dem Browserfenster laufen würde, beginnt der
+ * Tooltip direkt beim Glossarbegriff und öffnet nach rechts.
+ */
 .term-tooltip[data-tooltip-align="left"]::after {
     left: 0;
     right: auto;
@@ -448,8 +497,13 @@ details.accordion summary {
 }
 
 
-/* Begriff nahe am rechten Bildschirmrand */
+/* =========================================================
+   TOOLTIP AM RECHTEN RAND
+   ========================================================= */
 
+/*
+ * Am rechten Rand wird die Position umgekehrt.
+ */
 .term-tooltip[data-tooltip-align="right"]::after {
     left: auto;
     right: 0;
@@ -457,6 +511,11 @@ details.accordion summary {
     transform:
             translate(0, 6px);
 }
+
+
+/* =========================================================
+   TOOLTIP ANZEIGEN
+   ========================================================= */
 
 .term-tooltip:hover::after,
 .term-tooltip:focus::after {
@@ -634,6 +693,7 @@ footer {
 
     .meta {
         align-items: flex-start;
+
         flex-direction: column;
     }
 
