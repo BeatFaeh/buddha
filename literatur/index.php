@@ -1,6 +1,18 @@
 <?php
 declare(strict_types=1);
 
+require __DIR__ . '/../bootstrap/init.php';
+
+if (!$auth->isAdmin()) {
+    $returnTo = basename(__DIR__) . '/';
+    header('Location: ../index.php?action=admin&return_to=' . rawurlencode($returnTo));
+    exit;
+}
+
+$currentDirectoryPath = __DIR__;
+require __DIR__ . '/../directory-actions.php';
+$managerFlash = $flash->take();
+
 /*
 |--------------------------------------------------------------------------
 | Buddhistischer Verzeichnis-Browser
@@ -160,7 +172,7 @@ if ($handle !== false) {
 
         $files[] = [
             'name' => $filename,
-            'url' => rawurlencode($filename),
+            'url' => '../protected-file.php?area=' . rawurlencode($currentDirectory) . '&file=' . rawurlencode($filename),
             'type' => fileTypeLabel($filename),
             'icon' => fileIcon($filename),
             'size' => formatBytes((int) filesize($fullPath)),
@@ -210,6 +222,12 @@ $fileCount = count($files);
                 <?= e($pageSubtitle) ?>
             </p>
         </header>
+
+        <?php if ($managerFlash !== null): ?>
+            <div class="manager-message <?= e((string)$managerFlash['type']) ?>" role="status">
+                <?= e((string)$managerFlash['message']) ?>
+            </div>
+        <?php endif; ?>
 
         <section class="browser-card">
 
@@ -291,6 +309,10 @@ $fileCount = count($files);
                                 <th class="action-column">
                                     Öffnen
                                 </th>
+
+                                <th class="manage-column">
+                                    Bearbeiten
+                                </th>
                             </tr>
                         </thead>
 
@@ -356,6 +378,31 @@ $fileCount = count($files);
                                         >
                                             Öffnen
                                         </a>
+                                    </td>
+
+                                    <td class="manage-column">
+                                        <details class="file-actions">
+                                            <summary>Bearbeiten</summary>
+                                            <div class="file-actions-panel">
+                                                <form method="post" class="rename-form">
+                                                    <input type="hidden" name="csrf_token" value="<?= e($csrf->token()) ?>">
+                                                    <input type="hidden" name="file_action" value="rename">
+                                                    <input type="hidden" name="filename" value="<?= e($file['name']) ?>">
+                                                    <label>
+                                                        <span>Neuer Dateiname</span>
+                                                        <input type="text" name="new_name" value="<?= e($file['name']) ?>" required>
+                                                    </label>
+                                                    <button type="submit" class="rename-button">Umbenennen</button>
+                                                </form>
+
+                                                <form method="post" class="delete-form" onsubmit="return confirm('Datei wirklich endgültig löschen: <?= e(addslashes($file['name'])) ?>?');">
+                                                    <input type="hidden" name="csrf_token" value="<?= e($csrf->token()) ?>">
+                                                    <input type="hidden" name="file_action" value="delete">
+                                                    <input type="hidden" name="filename" value="<?= e($file['name']) ?>">
+                                                    <button type="submit" class="delete-button">Löschen</button>
+                                                </form>
+                                            </div>
+                                        </details>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

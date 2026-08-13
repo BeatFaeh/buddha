@@ -425,3 +425,134 @@ footer a {
         padding-inline: 10px;
     }
 }
+
+/* Datei-Verwaltung: Umbenennen und Löschen */
+.manager-message {
+    margin: 0 0 18px;
+    padding: 13px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--paper);
+    font-weight: 800;
+}
+
+.manager-message.success {
+    border-color: #b9cdb0;
+    color: var(--bodhi-dark);
+    background: #edf4e9;
+}
+
+.manager-message.error {
+    border-color: #d7aaa7;
+    color: #7e2924;
+    background: #fff0ef;
+}
+
+.manage-column {
+    width: 170px;
+    text-align: right !important;
+}
+
+.file-actions {
+    position: relative;
+    display: inline-block;
+    text-align: left;
+}
+
+.file-actions > summary {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 13px;
+    border: 2px solid var(--saffron);
+    border-radius: 10px;
+    color: var(--saffron-dark);
+    background: #fffaf0;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    list-style: none;
+}
+
+.file-actions > summary::-webkit-details-marker {
+    display: none;
+}
+
+.file-actions[open] > summary {
+    color: #fff;
+    background: var(--saffron);
+}
+
+.file-actions-panel {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(360px, 82vw);
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fffdf8;
+    box-shadow: 0 18px 45px rgba(72, 56, 35, .22);
+}
+
+.rename-form label {
+    display: grid;
+    gap: 5px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rename-form input[type="text"] {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 10px;
+    border: 2px solid var(--line);
+    border-radius: 9px;
+    color: var(--ink);
+    background: var(--white);
+    font: inherit;
+}
+
+.rename-form input[type="text"]:focus {
+    border-color: var(--saffron);
+    outline: 0;
+}
+
+.rename-button,
+.delete-button {
+    width: 100%;
+    min-height: 40px;
+    margin-top: 9px;
+    border: 0;
+    border-radius: 9px;
+    font: inherit;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.rename-button {
+    color: white;
+    background: var(--bodhi);
+}
+
+.rename-button:hover {
+    background: var(--bodhi-dark);
+}
+
+.delete-form {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.delete-button {
+    color: #fff;
+    background: #a43d36;
+}
+
+.delete-button:hover {
+    background: #7e2924;
+}
