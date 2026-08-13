@@ -43,6 +43,7 @@ $routes = [
     '' => 'home.php',
     'admin' => 'admin.php',
     'glossar' => 'glossary.php',
+    'glossar-pdf' => 'glossary-pdf.php',
     'pdf' => 'pdf.php',
     'pruefung' => 'exam.php',
 ];

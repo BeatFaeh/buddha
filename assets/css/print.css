@@ -1,1 +1,33 @@
 :root{--saffron:#c98324;--saffron-dark:#8f5d18;--lotus:#b96f7e;--bodhi:#5f7654;--bodhi-dark:#40533a;--ink:#2f332c;--muted:#74766e;--line:#ded6c6}*{box-sizing:border-box}body{margin:0;padding:32px;color:var(--ink);background:#f6f0e5;font-family:Arial,Helvetica,sans-serif;line-height:1.55}.toolbar,.document{width:min(900px,100%);margin-inline:auto}.toolbar{margin-bottom:28px;padding:18px;border-radius:14px;background:#fff}.search-form{display:grid;grid-template-columns:1fr auto auto;gap:12px}input{min-height:48px;padding:11px 15px;border:2px solid var(--line);border-radius:10px}.button,button{display:inline-flex;min-height:48px;align-items:center;justify-content:center;padding:11px 18px;border:0;border-radius:10px;color:#fff;background:var(--saffron);font-weight:700;text-decoration:none}.secondary{background:var(--bodhi)}.neutral{color:var(--bodhi-dark);background:#e9efe6}.print-actions{display:flex;justify-content:center;gap:12px;margin-top:14px}.result-info{text-align:center;color:var(--muted)}.document{padding:42px;background:#fff}.learning-card{margin-top:18px;padding:18px 20px;border:1px solid var(--line);border-left:6px solid var(--saffron);border-radius:10px;page-break-inside:avoid}.number{color:var(--lotus);font-size:12px;font-weight:700}.question{margin:8px 0 10px;color:var(--bodhi-dark);font-size:20px;font-weight:700}@media print{@page{size:A4 portrait;margin:16mm}body{padding:0;background:#fff}.toolbar{display:none}.document{width:auto;padding:0}}@media(max-width:720px){.search-form{grid-template-columns:1fr}}
+.glossary-document h1{margin-bottom:4px}.subtitle{margin-top:0;color:var(--muted)}.glossary-print-entry{padding:14px 0;border-bottom:1px solid var(--line);page-break-inside:avoid;break-inside:avoid}.glossary-print-entry:last-child{border-bottom:0}.glossary-term{margin-bottom:4px;color:var(--saffron-dark);font-size:18px;font-weight:700}.glossary-explanation{font-size:14px;line-height:1.5}@media print{.glossary-print-entry{padding:10px 0}.glossary-term{font-size:14pt}.glossary-explanation{font-size:10.5pt}}
+
+/* Glossar: Dokumentkopf und Druck-Kopf-/Fusszeilen */
+.document-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.document-date{margin:7px 0 0;color:var(--muted);font-size:13px;white-space:nowrap}
+
+@media print{
+  @page{
+    size:A4 portrait;
+    margin:22mm 16mm 20mm;
+    @top-left{
+      content:"Buddhistisches Glossar";
+      color:#74766e;
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:9pt;
+    }
+    @top-right{
+      content:"Datum: " var(--print-date);
+      color:#74766e;
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:9pt;
+    }
+    @bottom-center{
+      content:"Seite " counter(page) " von " counter(pages);
+      color:#74766e;
+      font-family:Arial,Helvetica,sans-serif;
+      font-size:9pt;
+    }
+  }
+  .document-header{margin-bottom:14px;padding-bottom:10px}
+  .document-date{font-size:9.5pt}
+}

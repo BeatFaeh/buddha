@@ -55,6 +55,10 @@ $rows = $glossaryRepository->all();
             <option value="desc">Begriff Z–A</option>
         </select>
 
+        <a class="button pdf-button" href="index.php?action=glossar-pdf">
+            Glossar als PDF
+        </a>
+
         <a class="button" href="index.php">
             Zurück zu den Lernkarten
         </a>

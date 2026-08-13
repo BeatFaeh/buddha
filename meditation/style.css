@@ -136,6 +136,35 @@ h1 {
         );
 }
 
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.home-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border: 2px solid var(--bodhi);
+    border-radius: 10px;
+    color: var(--bodhi-dark);
+    background: transparent;
+    font-size: 14px;
+    font-weight: 900;
+    text-decoration: none;
+    transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+}
+
+.home-button:hover {
+    border-color: var(--saffron);
+    color: white;
+    background: var(--saffron);
+}
+
 .badge {
     display: inline-flex;
     align-items: center;

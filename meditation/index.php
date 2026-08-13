@@ -232,7 +232,11 @@ $fileCount = count($files);
         <section class="browser-card">
 
             <div class="browser-toolbar">
-                <div>
+                <div class="toolbar-left">
+                    <a class="home-button" href="../index.php" title="Zur Hauptseite">
+                        ← Hauptseite
+                    </a>
+
                     <span class="badge">
                         <?= $fileCount ?>
                         <?= $fileCount === 1 ? 'Dokument' : 'Dokumente' ?>
