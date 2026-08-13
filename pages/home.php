@@ -200,7 +200,7 @@ $glossary = $glossaryRepository->asMap();
                 >
                     🔎 Suchen
                 </button>
-
+<p>&nbsp;</p>
             </div>
 
         </form>
