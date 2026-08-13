@@ -35,9 +35,9 @@ $excludedFiles = [
     'style.css',
     'directory.js',
     '.htaccess',
-    'Thumbs.db',
-    '.DS_Store',
-    'README.md',
+    'thumbs.db',
+    '.ds_store',
+    'readme.md',
 ];
 
 /*
@@ -143,7 +143,7 @@ if ($handle !== false) {
             continue;
         }
 
-        if (in_array($filename, $excludedFiles, true)) {
+        if (in_array(strtolower($filename), $excludedFiles, true)) {
             continue;
         }
 
@@ -176,7 +176,7 @@ if ($handle !== false) {
 usort(
     $files,
     static fn(array $a, array $b): int =>
-        strnatcasecmp((string) $a['name'], (string) $b['name'])
+    strnatcasecmp((string) $a['name'], (string) $b['name'])
 );
 
 $fileCount = count($files);
@@ -225,10 +225,10 @@ $fileCount = count($files);
                     <span class="visually-hidden">Dokumente durchsuchen</span>
 
                     <input
-                        id="file-search"
-                        type="search"
-                        placeholder="Dokumente durchsuchen …"
-                        autocomplete="off"
+                            id="file-search"
+                            type="search"
+                            placeholder="Dokumente durchsuchen …"
+                            autocomplete="off"
                     >
                 </label>
             </div>
@@ -247,126 +247,126 @@ $fileCount = count($files);
                 <div class="table-wrapper">
                     <table class="file-table" id="file-table">
                         <thead>
-                            <tr>
-                                <th
+                        <tr>
+                            <th
                                     class="number-column"
                                     data-sort="number"
                                     aria-label="Nach Nummer sortieren"
-                                >
-                                    Nr.
-                                </th>
+                            >
+                                Nr.
+                            </th>
 
-                                <th
+                            <th
                                     data-sort="name"
                                     aria-label="Nach Dateiname sortieren"
-                                >
-                                    Dokument
-                                    <span class="sort-indicator" aria-hidden="true">↕</span>
-                                </th>
+                            >
+                                Dokument
+                                <span class="sort-indicator" aria-hidden="true">↕</span>
+                            </th>
 
-                                <th
+                            <th
                                     data-sort="type"
                                     aria-label="Nach Dateityp sortieren"
-                                >
-                                    Typ
-                                    <span class="sort-indicator" aria-hidden="true">↕</span>
-                                </th>
+                            >
+                                Typ
+                                <span class="sort-indicator" aria-hidden="true">↕</span>
+                            </th>
 
-                                <th
+                            <th
                                     data-sort="size"
                                     aria-label="Nach Dateigrösse sortieren"
-                                >
-                                    Grösse
-                                    <span class="sort-indicator" aria-hidden="true">↕</span>
-                                </th>
+                            >
+                                Grösse
+                                <span class="sort-indicator" aria-hidden="true">↕</span>
+                            </th>
 
-                                <th
+                            <th
                                     data-sort="modified"
                                     aria-label="Nach Änderungsdatum sortieren"
-                                >
-                                    Geändert
-                                    <span class="sort-indicator" aria-hidden="true">↕</span>
-                                </th>
+                            >
+                                Geändert
+                                <span class="sort-indicator" aria-hidden="true">↕</span>
+                            </th>
 
-                                <th class="action-column">
-                                    Öffnen
-                                </th>
-                            </tr>
+                            <th class="action-column">
+                                Öffnen
+                            </th>
+                        </tr>
                         </thead>
 
                         <tbody>
-                            <?php foreach ($files as $index => $file): ?>
-                                <tr
+                        <?php foreach ($files as $index => $file): ?>
+                            <tr
                                     data-search="<?= e(mb_strtolower(
                                         $file['name'] . ' ' . $file['type'],
                                         'UTF-8'
                                     )) ?>"
-                                >
-                                    <td
+                            >
+                                <td
                                         class="number-column"
                                         data-value="<?= $index + 1 ?>"
-                                    >
-                                        <?= $index + 1 ?>
-                                    </td>
+                                >
+                                    <?= $index + 1 ?>
+                                </td>
 
-                                    <td
+                                <td
                                         class="file-name-cell"
                                         data-value="<?= e(mb_strtolower($file['name'], 'UTF-8')) ?>"
-                                    >
+                                >
                                         <span class="file-icon" aria-hidden="true">
                                             <?= $file['icon'] ?>
                                         </span>
 
-                                        <a
+                                    <a
                                             class="file-name"
                                             href="<?= e($file['url']) ?>"
                                             target="_blank"
                                             rel="noopener"
-                                        >
-                                            <?= e($file['name']) ?>
-                                        </a>
-                                    </td>
+                                    >
+                                        <?= e($file['name']) ?>
+                                    </a>
+                                </td>
 
-                                    <td data-value="<?= e($file['type']) ?>">
+                                <td data-value="<?= e($file['type']) ?>">
                                         <span class="type-badge">
                                             <?= e($file['type']) ?>
                                         </span>
-                                    </td>
+                                </td>
 
-                                    <td
+                                <td
                                         class="size-cell"
                                         data-value="<?= $file['size_bytes'] ?>"
-                                    >
-                                        <?= e($file['size']) ?>
-                                    </td>
+                                >
+                                    <?= e($file['size']) ?>
+                                </td>
 
-                                    <td
+                                <td
                                         class="date-cell"
                                         data-value="<?= $file['modified_timestamp'] ?>"
-                                    >
-                                        <?= e($file['modified']) ?>
-                                    </td>
+                                >
+                                    <?= e($file['modified']) ?>
+                                </td>
 
-                                    <td class="action-column">
-                                        <a
+                                <td class="action-column">
+                                    <a
                                             class="open-button"
                                             href="<?= e($file['url']) ?>"
                                             target="_blank"
                                             rel="noopener"
-                                        >
-                                            Öffnen
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                                    >
+                                        Öffnen
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
 
                 <div
-                    id="no-results"
-                    class="empty-state compact"
-                    hidden
+                        id="no-results"
+                        class="empty-state compact"
+                        hidden
                 >
                     <div class="empty-icon">🔎</div>
                     <h2>Keine Treffer</h2>
@@ -383,17 +383,17 @@ $fileCount = count($files);
             <br><br>
             Design, Programming by Beat Faeh ·
             <a
-                href="https://www.faeh.sh"
-                target="_blank"
-                rel="noopener"
+                    href="https://www.faeh.sh"
+                    target="_blank"
+                    rel="noopener"
             >
                 www.faeh.sh
             </a>
-<br><br>			
+            <br><br>
             <a
-                href="https://www.faeh.sh/buddha"
-                target="_blank"
-                rel="noopener"
+                    href="https://www.faeh.sh/buddha"
+                    target="_blank"
+                    rel="noopener"
             >
                 zurück
             </a>

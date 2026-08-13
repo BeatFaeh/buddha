@@ -35,9 +35,9 @@ $excludedFiles = [
     'style.css',
     'directory.js',
     '.htaccess',
-    'Thumbs.db',
-    '.DS_Store',
-    'README.md',
+    'thumbs.db',
+    '.ds_store',
+    'readme.md',
 ];
 
 /*
@@ -143,7 +143,7 @@ if ($handle !== false) {
             continue;
         }
 
-        if (in_array($filename, $excludedFiles, true)) {
+        if (in_array(strtolower($filename), $excludedFiles, true)) {
             continue;
         }
 

@@ -59,7 +59,7 @@ $glossaryRows = $glossaryRepository->all();
                 <input type="hidden" name="csrf_token" value="<?= Html::e($csrf->token()) ?>">
                 <input type="hidden" name="form_action" value="add_glossary">
                 <label>Begriff</label>
-                <input type="text" name="begriff" maxlength="120" required>
+                <input type="text" name="begriff" maxlength="250" required>
                 <label>Erklärung</label>
                 <textarea name="erklaerung" required></textarea>
                 <button type="submit">Glossarbegriff speichern</button>
