@@ -13,6 +13,15 @@ if (!in_array($mode, ['text', 'mc'], true)) {
     $mode = 'text';
 }
 
+$selectedModule = filter_input(INPUT_GET, 'modul', FILTER_VALIDATE_INT);
+if ($selectedModule === false || $selectedModule === null || $selectedModule < 1 || $selectedModule > 6) {
+    $selectedModule = null;
+}
+
+$moduleQuery = $selectedModule !== null
+    ? '&modul=' . $selectedModule
+    : '';
+
 
 /* =========================================================
    GEZIELTE KARTENAUSWAHL
@@ -41,13 +50,15 @@ if ($search !== '') {
     if (ctype_digit($search)) {
 
         $card = $cardRepository->findById(
-            (int) $search
+            (int) $search,
+            $selectedModule
         );
 
         if (!$card) {
             $searchMessage =
                 'Keine Lernkarte mit der ID '
                 . $search
+                . ($selectedModule !== null ? ' in Modul ' . $selectedModule : '')
                 . ' gefunden.';
         }
 
@@ -58,14 +69,17 @@ if ($search !== '') {
          * Suche nach Begriff in Frage und Antwort.
          */
         $card = $cardRepository->findByTerm(
-            $search
+            $search,
+            $selectedModule
         );
 
         if (!$card) {
             $searchMessage =
                 'Keine Lernkarte zum Begriff „'
                 . $search
-                . '“ gefunden.';
+                . '“'
+                . ($selectedModule !== null ? ' in Modul ' . $selectedModule : '')
+                . ' gefunden.';
         }
     }
 
@@ -74,11 +88,12 @@ if ($search !== '') {
     /*
      * Bestehende Zufallsfunktion.
      */
-    $card = $cardRepository->random();
+    $card = $cardRepository->random($selectedModule);
 }
 
 
-$count = $cardRepository->count();
+$count = $cardRepository->count($selectedModule);
+$moduleCounts = $cardRepository->countByModule();
 
 
 /* =========================================================
@@ -91,7 +106,7 @@ $quiz = [
 ];
 
 if ($mode === 'mc' && $card) {
-    $quiz = $quizService->build($card);
+    $quiz = $quizService->build($card, $selectedModule);
 }
 
 
@@ -144,19 +159,63 @@ $glossary = $glossaryRepository->asMap();
 
             <a
                     class="mode-button <?= $mode === 'text' ? 'active' : '' ?>"
-                    href="index.php?modus=text"
+                    href="index.php?modus=text<?= Html::e($moduleQuery) ?>"
             >
                 📖 Lernkarte
             </a>
 
             <a
                     class="mode-button <?= $mode === 'mc' ? 'active' : '' ?>"
-                    href="index.php?modus=mc"
+                    href="index.php?modus=mc<?= Html::e($moduleQuery) ?>"
             >
                 ✓ Multiple Choice
             </a>
 
         </nav>
+
+
+        <!-- =====================================================
+             MODULFILTER UND ANZAHL LERNKARTEN
+             ===================================================== -->
+
+        <section class="module-panel" aria-labelledby="module-filter-title">
+
+            <form class="module-filter" method="get" action="index.php">
+                <input type="hidden" name="modus" value="<?= Html::e($mode) ?>">
+
+                <label id="module-filter-title" for="module-filter-select">
+                    Lernkarten nach Modul auswählen
+                </label>
+
+                <div class="module-filter-row">
+                    <select id="module-filter-select" name="modul">
+                        <option value="">Alle Module</option>
+                        <?php for ($moduleOption = 1; $moduleOption <= 6; $moduleOption++): ?>
+                            <option value="<?= $moduleOption ?>" <?= $selectedModule === $moduleOption ? 'selected' : '' ?>>
+                                Modul <?= $moduleOption ?> (<?= $moduleCounts[$moduleOption] ?>)
+                            </option>
+                        <?php endfor; ?>
+                    </select>
+
+                    <button class="button button-primary" type="submit">
+                        Modul anwenden
+                    </button>
+                </div>
+            </form>
+
+            <div class="module-counts" aria-label="Anzahl Lernkarten pro Modul">
+                <?php for ($moduleOption = 1; $moduleOption <= 6; $moduleOption++): ?>
+                    <a
+                            class="module-count <?= $selectedModule === $moduleOption ? 'active' : '' ?>"
+                            href="index.php?modus=<?= Html::e($mode) ?>&modul=<?= $moduleOption ?>"
+                    >
+                        <span>Modul <?= $moduleOption ?></span>
+                        <strong><?= $moduleCounts[$moduleOption] ?></strong>
+                    </a>
+                <?php endfor; ?>
+            </div>
+
+        </section>
 
 
         <!-- =====================================================
@@ -174,6 +233,10 @@ $glossary = $glossaryRepository->asMap();
                     name="modus"
                     value="<?= Html::e($mode) ?>"
             >
+
+            <?php if ($selectedModule !== null): ?>
+                <input type="hidden" name="modul" value="<?= $selectedModule ?>">
+            <?php endif; ?>
 
             <label
                     class="card-search-label"
@@ -250,7 +313,7 @@ $glossary = $glossaryRepository->asMap();
 
                             <a
                                     class="button button-primary"
-                                    href="index.php?modus=<?= Html::e($mode) ?>"
+                                    href="index.php?modus=<?= Html::e($mode) ?><?= Html::e($moduleQuery) ?>"
                             >
                                 <?= $mode === 'mc'
                                     ? 'Neue Multiple-Choice-Frage'
@@ -293,6 +356,10 @@ $glossary = $glossaryRepository->asMap();
 
                             #<?= (int) $card['id'] ?>
 
+                            <?php if ((int) ($card['modul'] ?? 0) >= 1 && (int) ($card['modul'] ?? 0) <= 6): ?>
+                                · Modul <?= (int) $card['modul'] ?>
+                            <?php endif; ?>
+
                         </span>
 
                         <span class="counter">
@@ -302,6 +369,11 @@ $glossary = $glossaryRepository->asMap();
                             <?= $count === 1
                                 ? 'Lernkarte'
                                 : 'Lernkarten'
+                            ?>
+
+                            <?= $selectedModule !== null
+                                ? 'in Modul ' . $selectedModule
+                                : 'insgesamt'
                             ?>
 
                         </span>
@@ -386,7 +458,10 @@ $glossary = $glossaryRepository->asMap();
                                     tbl_buddhismus.antwort
                                 </code>
 
-                                benötigt.
+                                <?= $selectedModule !== null
+                                    ? 'innerhalb von Modul ' . $selectedModule
+                                    : ''
+                                ?> benötigt.
 
                             </div>
 
@@ -432,7 +507,7 @@ $glossary = $glossaryRepository->asMap();
 
                         <a
                                 class="button button-primary"
-                                href="index.php?modus=<?= Html::e($mode) ?>"
+                                href="index.php?modus=<?= Html::e($mode) ?><?= Html::e($moduleQuery) ?>"
                         >
 
                             <?= $mode === 'mc'

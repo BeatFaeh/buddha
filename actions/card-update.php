@@ -5,16 +5,22 @@ $auth->requireAdmin();
 $csrf->verify();
 
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+$modul = filter_input(INPUT_POST, 'modul', FILTER_VALIDATE_INT);
+$returnModul = filter_input(INPUT_POST, 'return_modul', FILTER_VALIDATE_INT);
 $frage = trim((string) ($_POST['frage'] ?? ''));
 $antwort = trim((string) ($_POST['antwort'] ?? ''));
 
-if (!$id || $frage === '' || $antwort === '') {
+if (!$id || $modul === false || $modul === null || $modul < 1 || $modul > 6 || $frage === '' || $antwort === '') {
     $flash->set('error', 'Die Lernkarte enthält ungültige Angaben.');
-} elseif ($cardRepository->update((int) $id, $frage, $antwort)) {
+} elseif ($cardRepository->update((int) $id, $frage, $antwort, $modul)) {
     $flash->set('success', 'Die Lernkarte wurde aktualisiert.');
 } else {
     $flash->set('error', 'Die Lernkarte konnte nicht aktualisiert werden.');
 }
 
-header('Location: index.php?action=admin#lernkarten');
+$location = 'index.php?action=admin';
+if ($returnModul !== false && $returnModul !== null && $returnModul >= 1 && $returnModul <= 6) {
+    $location .= '&modul=' . $returnModul;
+}
+header('Location: ' . $location . '#lernkarten');
 exit;

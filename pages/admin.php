@@ -7,7 +7,11 @@ if (!$auth->isAdmin()) {
 }
 
 $flashMessage = $flash->take();
-$cards = $cardRepository->all();
+$selectedModule = filter_input(INPUT_GET, 'modul', FILTER_VALIDATE_INT);
+if ($selectedModule === false || $selectedModule === null || $selectedModule < 1 || $selectedModule > 6) {
+    $selectedModule = null;
+}
+$cards = $cardRepository->all($selectedModule);
 $glossaryRows = $glossaryRepository->all();
 ?>
 <!doctype html>
@@ -45,6 +49,13 @@ $glossaryRows = $glossaryRepository->all();
             <form method="post" action="index.php">
                 <input type="hidden" name="csrf_token" value="<?= Html::e($csrf->token()) ?>">
                 <input type="hidden" name="form_action" value="add_card">
+                <label for="modul">Modul</label>
+                <select id="modul" name="modul" required>
+                    <option value="" selected disabled>Modul auswählen</option>
+                    <?php for ($modul = 1; $modul <= 6; $modul++): ?>
+                        <option value="<?= $modul ?>">Modul <?= $modul ?></option>
+                    <?php endfor; ?>
+                </select>
                 <label>Frage</label>
                 <textarea name="frage" required></textarea>
                 <label>Antwort</label>
@@ -127,15 +138,51 @@ $glossaryRows = $glossaryRepository->all();
 
     <section class="panel list-panel" id="lernkarten">
         <h2>Lernkarten bearbeiten</h2>
-        <p class="muted"><?= count($cards) ?> Lernkarten vorhanden.</p>
+        <form method="get" action="index.php#lernkarten" class="filter-form">
+            <input type="hidden" name="action" value="admin">
+            <label for="modul-filter">Nach Modul filtern</label>
+            <select id="modul-filter" name="modul">
+                <option value="">Alle Module</option>
+                <?php for ($moduleOption = 1; $moduleOption <= 6; $moduleOption++): ?>
+                    <option value="<?= $moduleOption ?>" <?= $selectedModule === $moduleOption ? 'selected' : '' ?>>
+                        Modul <?= $moduleOption ?>
+                    </option>
+                <?php endfor; ?>
+            </select>
+            <div class="filter-actions">
+                <button type="submit">Filtern</button>
+                <a class="button neutral" href="index.php?action=admin#lernkarten">Filter zurücksetzen</a>
+            </div>
+        </form>
+        <p class="muted">
+            <?= count($cards) ?> Lernkarten<?= $selectedModule !== null ? ' in Modul ' . $selectedModule : '' ?> vorhanden.
+        </p>
 
         <?php foreach ($cards as $card): ?>
             <details class="entry">
-                <summary>#<?= (int) $card['id'] ?> · <?= Html::e($card['frage']) ?></summary>
+                <summary>
+                    #<?= (int) $card['id'] ?> ·
+                    <?= (int) ($card['modul'] ?? 0) >= 1 && (int) ($card['modul'] ?? 0) <= 6
+                        ? 'Modul ' . (int) $card['modul']
+                        : 'Modul nicht zugeordnet' ?> ·
+                    <?= Html::e($card['frage']) ?>
+                </summary>
                 <form method="post" action="index.php">
                     <input type="hidden" name="csrf_token" value="<?= Html::e($csrf->token()) ?>">
                     <input type="hidden" name="form_action" value="update_card">
                     <input type="hidden" name="id" value="<?= (int) $card['id'] ?>">
+                    <?php if ($selectedModule !== null): ?>
+                        <input type="hidden" name="return_modul" value="<?= $selectedModule ?>">
+                    <?php endif; ?>
+                    <label for="modul-<?= (int) $card['id'] ?>">Modul</label>
+                    <select id="modul-<?= (int) $card['id'] ?>" name="modul" required>
+                        <option value="" disabled <?= !isset($card['modul']) ? 'selected' : '' ?>>Modul auswählen</option>
+                        <?php for ($moduleOption = 1; $moduleOption <= 6; $moduleOption++): ?>
+                            <option value="<?= $moduleOption ?>" <?= (int) ($card['modul'] ?? 0) === $moduleOption ? 'selected' : '' ?>>
+                                Modul <?= $moduleOption ?>
+                            </option>
+                        <?php endfor; ?>
+                    </select>
                     <label>Frage</label>
                     <textarea name="frage" required><?= Html::e($card['frage']) ?></textarea>
                     <label>Antwort</label>

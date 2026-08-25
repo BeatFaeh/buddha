@@ -5,17 +5,26 @@ final class QuizService
 {
     public function __construct(private mysqli $db) {}
 
-    public function build(array $card): array
+    public function build(array $card, ?int $modul = null): array
     {
         $correctAnswer = trim((string)$card['antwort']);
         $answers = [$correctAnswer];
 
+        $moduleCondition = $modul !== null && $modul >= 1 && $modul <= 6
+            ? ' AND modul = ?'
+            : '';
         $stmt = $this->db->prepare(
             "SELECT DISTINCT antwort FROM tbl_buddhismus "
-            . "WHERE antwort IS NOT NULL AND TRIM(antwort) <> '' AND TRIM(antwort) <> ? ORDER BY RAND() LIMIT 3"
+            . "WHERE antwort IS NOT NULL AND TRIM(antwort) <> '' AND TRIM(antwort) <> ?"
+            . $moduleCondition
+            . " ORDER BY RAND() LIMIT 3"
         );
         if ($stmt) {
-            $stmt->bind_param('s', $correctAnswer);
+            if ($moduleCondition !== '') {
+                $stmt->bind_param('si', $correctAnswer, $modul);
+            } else {
+                $stmt->bind_param('s', $correctAnswer);
+            }
             $stmt->execute();
             $result = $stmt->get_result();
             while ($row = $result->fetch_assoc()) {

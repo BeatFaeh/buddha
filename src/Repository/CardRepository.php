@@ -13,10 +13,36 @@ final class CardRepository
     /**
      * Eine zufällige Lernkarte laden.
      */
-    public function random(): ?array
+    public function random(?int $modul = null): ?array
     {
+        if ($modul !== null && $modul >= 1 && $modul <= 6) {
+            $stmt = $this->db->prepare(
+                "SELECT id, frage, antwort, modul
+                 FROM tbl_buddhismus
+                 WHERE modul = ?
+                   AND frage IS NOT NULL
+                   AND TRIM(frage) <> ''
+                   AND antwort IS NOT NULL
+                   AND TRIM(antwort) <> ''
+                 ORDER BY RAND()
+                 LIMIT 1"
+            );
+
+            if (!$stmt) {
+                return null;
+            }
+
+            $stmt->bind_param('i', $modul);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $stmt->close();
+
+            return $row ?: null;
+        }
+
         $result = $this->db->query(
-            "SELECT id, frage, antwort
+            "SELECT id, frage, antwort, modul
              FROM tbl_buddhismus
              WHERE frage IS NOT NULL
                AND TRIM(frage) <> ''
@@ -69,16 +95,21 @@ final class CardRepository
     /**
      * Eine Lernkarte anhand ihrer ID laden.
      */
-    public function findById(int $id): ?array
+    public function findById(int $id, ?int $modul = null): ?array
     {
         if ($id <= 0) {
             return null;
         }
 
+        $moduleCondition = $modul !== null && $modul >= 1 && $modul <= 6
+            ? ' AND modul = ?'
+            : '';
+
         $stmt = $this->db->prepare(
-            "SELECT id, frage, antwort
+            "SELECT id, frage, antwort, modul
              FROM tbl_buddhismus
              WHERE id = ?
+               {$moduleCondition}
                AND frage IS NOT NULL
                AND TRIM(frage) <> ''
                AND antwort IS NOT NULL
@@ -90,10 +121,11 @@ final class CardRepository
             return null;
         }
 
-        $stmt->bind_param(
-            'i',
-            $id
-        );
+        if ($moduleCondition !== '') {
+            $stmt->bind_param('ii', $id, $modul);
+        } else {
+            $stmt->bind_param('i', $id);
+        }
 
         $stmt->execute();
 
@@ -115,7 +147,7 @@ final class CardRepository
      * Falls mehrere Karten passen,
      * wird die Karte mit der kleinsten ID geladen.
      */
-    public function findByTerm(string $term): ?array
+    public function findByTerm(string $term, ?int $modul = null): ?array
     {
         $term = trim($term);
 
@@ -123,14 +155,19 @@ final class CardRepository
             return null;
         }
 
+        $moduleCondition = $modul !== null && $modul >= 1 && $modul <= 6
+            ? ' AND modul = ?'
+            : '';
+
         $stmt = $this->db->prepare(
-            "SELECT id, frage, antwort
+            "SELECT id, frage, antwort, modul
              FROM tbl_buddhismus
              WHERE (
                     frage LIKE CONCAT('%', ?, '%')
                     OR
                     antwort LIKE CONCAT('%', ?, '%')
                    )
+               {$moduleCondition}
                AND frage IS NOT NULL
                AND TRIM(frage) <> ''
                AND antwort IS NOT NULL
@@ -143,11 +180,11 @@ final class CardRepository
             return null;
         }
 
-        $stmt->bind_param(
-            'ss',
-            $term,
-            $term
-        );
+        if ($moduleCondition !== '') {
+            $stmt->bind_param('ssi', $term, $term, $modul);
+        } else {
+            $stmt->bind_param('ss', $term, $term);
+        }
 
         $stmt->execute();
 
@@ -164,21 +201,43 @@ final class CardRepository
     /**
      * Alle Lernkarten absteigend nach ID.
      */
-    public function all(): array
+    public function all(?int $modul = null): array
     {
         $rows = [];
 
-        $result = $this->db->query(
-            'SELECT id, frage, antwort
-             FROM tbl_buddhismus
-             ORDER BY id DESC'
-        );
+        if ($modul !== null && $modul >= 1 && $modul <= 6) {
+            $stmt = $this->db->prepare(
+                'SELECT id, frage, antwort, modul
+                 FROM tbl_buddhismus
+                 WHERE modul = ?
+                 ORDER BY id DESC'
+            );
+
+            if (!$stmt) {
+                return $rows;
+            }
+
+            $stmt->bind_param('i', $modul);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        } else {
+            $stmt = null;
+            $result = $this->db->query(
+                'SELECT id, frage, antwort, modul
+                 FROM tbl_buddhismus
+                 ORDER BY id DESC'
+            );
+        }
 
         while (
             $result
             && $row = $result->fetch_assoc()
         ) {
             $rows[] = $row;
+        }
+
+        if ($stmt !== null) {
+            $stmt->close();
         }
 
         return $rows;
@@ -254,8 +313,32 @@ final class CardRepository
     /**
      * Anzahl aller vollständigen Lernkarten.
      */
-    public function count(): int
+    public function count(?int $modul = null): int
     {
+        if ($modul !== null && $modul >= 1 && $modul <= 6) {
+            $stmt = $this->db->prepare(
+                "SELECT COUNT(*) AS anzahl
+                 FROM tbl_buddhismus
+                 WHERE modul = ?
+                   AND frage IS NOT NULL
+                   AND TRIM(frage) <> ''
+                   AND antwort IS NOT NULL
+                   AND TRIM(antwort) <> ''"
+            );
+
+            if (!$stmt) {
+                return 0;
+            }
+
+            $stmt->bind_param('i', $modul);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $stmt->close();
+
+            return (int) ($row['anzahl'] ?? 0);
+        }
+
         $result = $this->db->query(
             "SELECT COUNT(*) AS anzahl
              FROM tbl_buddhismus
@@ -274,16 +357,44 @@ final class CardRepository
 
 
     /**
+     * Anzahl vollständiger Lernkarten je Modul (1 bis 6).
+     */
+    public function countByModule(): array
+    {
+        $counts = array_fill(1, 6, 0);
+
+        $result = $this->db->query(
+            "SELECT modul, COUNT(*) AS anzahl
+             FROM tbl_buddhismus
+             WHERE modul BETWEEN 1 AND 6
+               AND frage IS NOT NULL
+               AND TRIM(frage) <> ''
+               AND antwort IS NOT NULL
+               AND TRIM(antwort) <> ''
+             GROUP BY modul
+             ORDER BY modul ASC"
+        );
+
+        while ($result && $row = $result->fetch_assoc()) {
+            $counts[(int) $row['modul']] = (int) $row['anzahl'];
+        }
+
+        return $counts;
+    }
+
+
+    /**
      * Neue Lernkarte anlegen.
      */
     public function add(
         string $frage,
-        string $antwort
+        string $antwort,
+        int $modul
     ): bool {
         $stmt = $this->db->prepare(
             'INSERT INTO tbl_buddhismus
-             (frage, antwort)
-             VALUES (?, ?)'
+             (frage, antwort, modul)
+             VALUES (?, ?, ?)'
         );
 
         if (!$stmt) {
@@ -291,9 +402,10 @@ final class CardRepository
         }
 
         $stmt->bind_param(
-            'ss',
+            'ssi',
             $frage,
-            $antwort
+            $antwort,
+            $modul
         );
 
         $ok = $stmt->execute();
@@ -310,12 +422,14 @@ final class CardRepository
     public function update(
         int $id,
         string $frage,
-        string $antwort
+        string $antwort,
+        int $modul
     ): bool {
         $stmt = $this->db->prepare(
             'UPDATE tbl_buddhismus
              SET frage = ?,
-                 antwort = ?
+                 antwort = ?,
+                 modul = ?
              WHERE id = ?'
         );
 
@@ -324,9 +438,10 @@ final class CardRepository
         }
 
         $stmt->bind_param(
-            'ssi',
+            'ssii',
             $frage,
             $antwort,
+            $modul,
             $id
         );
 

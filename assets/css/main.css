@@ -173,6 +173,87 @@ h1 {
 
 
 /* =========================================================
+   MODULFILTER UND MODULSTATISTIK
+   ========================================================= */
+
+.module-panel {
+    margin: 0 0 18px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(255, 253, 248, .88);
+}
+
+.module-filter label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--bodhi-dark);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.module-filter-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+}
+
+.module-filter select {
+    width: 100%;
+    min-height: 52px;
+    padding: 12px 16px;
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    color: var(--ink);
+    background: #fff;
+    font: inherit;
+}
+
+.module-counts {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.module-count {
+    display: grid;
+    gap: 3px;
+    padding: 10px 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--bodhi-dark);
+    background: #fff;
+    font-size: 12px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.module-count strong {
+    color: var(--saffron-dark);
+    font-size: 20px;
+}
+
+.module-count.active {
+    border-color: var(--saffron);
+    background: #fff6df;
+    box-shadow: 0 0 0 2px rgba(201, 131, 36, .12);
+}
+
+@media (max-width: 720px) {
+    .module-counts {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .module-filter-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
    GEZIELTE LERNKARTEN-SUCHE
    ========================================================= */
 
